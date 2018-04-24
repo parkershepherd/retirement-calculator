@@ -11,8 +11,13 @@
 			margin: 10px 20px 20px;
 			padding-bottom: 10px;
 		}
+		h4{
+			width: 180px;
+			text-align: right;
+			margin: 40px 0 10px 0;
+		}
 		label {
-			width: 200px;
+			width: 180px;
 			display: block;
 			float: left;
 			text-align: right;
@@ -33,10 +38,15 @@
 		}
 		table {
 			border-collapse: collapse;
-			min-width: 500px;
 		}
 		table td {
 			padding: 0;
+		}
+		.bar-container {
+			min-width: 390px;
+		}
+		.stat {
+			padding: 0 10px;
 		}
 		table td span {
 			display: block;
@@ -49,37 +59,50 @@
 		.saving {
 			background-color: green;
 		}
+		.saving.waiting {
+			background-color: lightgreen;
+		}
+		.positive {
+			color: green;
+		}
+		.negative {
+			color: darkred;
+		}
 	</style>
 </head>
 <body>
 	<div class="input-values">
 		<h1>Retirement Calculator</h1>
+		<h4>Market Assumptions</h4>
 		<label for="inflationRate">Inflation Rate</label>
 		<input type="number" id="inflationRate" min="0" step="0.1" max="100"/>%
 		<br/>
-		<label for="earningsRate">Retirement Earnings</label>
+		<label for="earningsRate">Investment Return</label>
 		<input type="number" id="earningsRate" min="0" step="0.5" max="100"/>%
 		<br/>
 		<label for="raiseRate">Raise Rate</label>
 		<input type="number" id="raiseRate" min="0" max="100"/>%
 		<br/>
-		<label for="savingsRate">Savings Rate</label>
-		<input type="number" id="savingsRate" min="0" max="100"/>%
-		<br/>
+		<h4>Simulation Params</h4>
+
 		<label for="age">Age</label>
 		<input type="number" id="age" min="0" max="100"/>
 		<br/>
 		<label for="ageAtDeath">Age at Death</label>
 		<input type="number" id="ageAtDeath" min="0" max="130"/>
 		<br/>
-		<label for="retireDelayYears">Retire Delay Years</label>
-		<input type="number" id="retireDelayYears" min="0"/>
-		<br/>
 		<label for="income">Income $</label>
 		<input type="number" id="income" min="0" step="5000"/>
 		<br/>
 		<label for="currentSavings">Current Savings $</label>
 		<input type="number" id="currentSavings" min="0" step="5000"/>
+		<br/>
+		<h4>Lifestyle Choices</h4>
+		<label for="savingsRate">Savings Rate</label>
+		<input type="number" id="savingsRate" min="0" max="100"/>%
+		<br/>
+		<label for="retireDelayYears">Retire Delay Years</label>
+		<input type="number" id="retireDelayYears" min="0"/>
 		<br/>
 		<label for="retirementSpending">Retirement Spending $</label>
 		<input type="number" id="retirementSpending" min="0" step="5000"/>
@@ -88,7 +111,7 @@
 	<div id="data"></div>
 	<script>
 		const settingTypes = {
-			inflationRate: {type: 'percent', default: 3.4},
+			inflationRate: {type: 'percent', default: 3.2},
 			earningsRate: {type: 'percent', default: 6},
 			raiseRate: {type: 'percent', default: 4},
 			savingsRate: {type: 'percent', default: 10},
@@ -125,7 +148,7 @@
 				setDom(
 					settingKey,
 					settingType === 'percent'
-						? settingValue * 100
+						? Math.round(settingValue * 100 * 100)/100
 						: settingValue
 				)
 			}
@@ -156,6 +179,9 @@
 			let couldHaveRetiredYearsAgo = 0
 			state.inflationAdjustment = 1
 			state.adjustedRetirementSpending = state.retirementSpending
+			state.yearlyContributions = 0
+			state.yearlyWithdrawals = 0
+			state.yearlyInterest = 0
 			state.retired = false
 			state.year = (new Date()).getFullYear()
 
@@ -165,22 +191,30 @@
 					throw new Error('Simulated too many years, something is broken')
 				}
 				iterations++
-				years.push(Object.assign({}, state))
-				state.age++
-				state.year++
 				state.couldHaveRetiredYearsAgo = couldHaveRetiredYearsAgo
+				state.yearlyContributions = 0
+				state.yearlyWithdrawals = 0
+				state.yearlyInterest = 0
+				state.priorSavings = state.currentSavings
 
 				for (let month=0; month<12; month++) {
+					let priorSavings = state.currentSavings
 					// Assume you experience inflation throughout the year
 					state.inflationAdjustment *= (1 + state.inflationRate / 12)
 					state.currentSavings *= (1 + state.earningsRate / 12)
+					state.yearlyInterest += state.currentSavings - priorSavings
+
 					// Assume you don't earn interest on the current months deposits
-					state.currentSavings += state.income * state.savingsRate / 12
+					let depositAmount = state.income * state.savingsRate / 12
+					state.yearlyContributions += depositAmount
+					state.currentSavings += depositAmount
 					state.adjustedRetirementSpending = state.retirementSpending * state.inflationAdjustment
-					state.percentWouldBeWithdrawnPerYear = state.adjustedRetirementSpending / state.currentSavings
 				}
+				years.push(Object.assign({}, state))
 				// Assume you only get raises at the end of the year
 				state.income *= (1 + state.raiseRate)
+				state.age++
+				state.year++
 
 
 				// Check if we can retire yet
@@ -190,24 +224,33 @@
 				let testIterations = 0
 				let testYears = [];
 				// Simulate retired years
-				while (testState.age < testState.ageAtDeath && testState.currentSavings > 0) {
+				while (testState.age <= testState.ageAtDeath && testState.currentSavings > 0) {
 					if (testIterations > maxIterations) {
 						throw new Error('Simulated too many test years, something is broken')
 					}
 					testIterations++
-					testYears.push(Object.assign({}, testState))
-					testState.age++
-					testState.year++
+					testState.yearlyContributions = 0
+					testState.yearlyWithdrawals = 0
+					testState.yearlyInterest = 0
+					testState.priorSavings = testState.currentSavings
 
 					for (let month=0; month<12; month++) {
 						testState.inflationAdjustment *= (1 + testState.inflationRate / 12)
 						testState.adjustedRetirementSpending = testState.retirementSpending * testState.inflationAdjustment
 						// Assume you withdraw money at the beginning of the month
-						testState.currentSavings -= testState.adjustedRetirementSpending / 12
+						let withdrawalAmount = testState.adjustedRetirementSpending / 12
+						testState.yearlyWithdrawals += withdrawalAmount
+						testState.currentSavings -= withdrawalAmount
+
 						// Assume you earn interest at the end of the month
+						let priorSavings = testState.currentSavings
 						testState.currentSavings *= (1 + testState.earningsRate / 12)
-						testState.percentWouldBeWithdrawnPerYear = testState.adjustedRetirementSpending / testState.currentSavings
+						testState.yearlyInterest += testState.currentSavings - priorSavings
 					}
+					testYears.push(Object.assign({}, testState))
+					testState.age++
+					testState.year++
+
 				}
 
 				// Check if we were able to retire
@@ -217,7 +260,7 @@
 					if (testState.retireDelayYears > state.couldHaveRetiredYearsAgo) {
 						couldHaveRetiredYearsAgo++
 					} else {
-						years = years.concat(testYears).concat([testState])
+						years = years.concat(testYears)
 						state = testState
 						break
 					}
@@ -244,18 +287,28 @@
 				<table style="font-size:${fontSize}px;line-height:${fontSize}px">
 					<tr>
 						<th>Age</th>
-						<th>Account Value</th>
-						<th colspan=2>Withdrawal Rate</th>
+						<th class="bar-container">Account Value</th>
+						<th class="stat">Interest</th>
+						<th class="stat">In/Out</th>
+						<th class="stat">Out Rate</th>
 					</tr>
 					${years.map(year => `
 						<tr>
 							<td>${year.age}</td>
 							<td>
-								<span class="bar ${year.retired ? 'retired' : 'saving'}" style="width:${year.currentSavings * graphWidth / maxAmount}px;height:${fontSize-1}px"></span>
+								<span class="bar ${year.retired ? 'retired' : 'saving'} ${year.couldHaveRetiredYearsAgo ? 'waiting' : ''}" style="width:${year.currentSavings * graphWidth / maxAmount}px;height:${fontSize-1}px"></span>
 								<span style="height:${fontSize}px">${abbrev(year.currentSavings)}</span>
 							</td>
-							<td>${yearRetired && yearRetired.year <= year.year ? abbrev(year.adjustedRetirementSpending) : ''}</td>
-							<td style="padding-left:10px">${yearRetired && yearRetired.year === year.year ? 'Retired!' : ''}</td>
+							<td class="positive">+${abbrev(year.yearlyInterest)}</td>
+							<td class="${year.yearlyContributions ? 'positive' : 'negative'}">
+								${year.yearlyContributions
+									? `+${abbrev(year.yearlyContributions)}`
+									: `(${abbrev(year.yearlyWithdrawals)})`
+							}</td>
+							<td>${year.yearlyWithdrawals
+								? format(year.yearlyWithdrawals * 100 / year.priorSavings,1) + '%'
+								: ''
+							}</td>
 						</tr>
 					`).join('')}
 				</table>
