@@ -301,10 +301,10 @@
 								<span class="bar ${year.retired ? 'retired' : 'saving'} ${year.couldHaveRetiredYearsAgo ? 'waiting' : ''}" style="width:${year.currentSavings * graphWidth / maxAmount}px;height:${fontSize-1}px"></span>
 								<span style="height:${fontSize}px">${abbrev(year.currentSavings)}</span>
 							</td>
-							<td class="positive">+${abbrev(year.yearlyInterest)}</td>
+							<td class="positive">${abbrev(year.yearlyInterest)}</td>
 							<td class="${year.yearlyContributions ? 'positive' : 'negative'}">
 								${year.yearlyContributions
-									? `+${abbrev(year.yearlyContributions)}`
+									? abbrev(year.yearlyContributions)
 									: `(${abbrev(year.yearlyWithdrawals)})`
 							}</td>
 							<td>${year.yearlyWithdrawals
