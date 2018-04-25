@@ -6,18 +6,21 @@
 			font-family: sans-serif;
 		}
 		h1 {
+			font-size: 25px;
 			text-align: center;
 			border-bottom: solid 1px lightgrey;
-			margin: 10px 20px 20px;
+			margin: 5px 20px 10px;
 			padding-bottom: 10px;
 		}
-		h4{
-			width: 180px;
+		h4, label {
+			width: 170px;
+		}
+		h4 {
 			text-align: right;
-			margin: 40px 0 10px 0;
+			margin: 30px 0 10px 0;
 		}
 		label {
-			width: 180px;
+			font-size: 14px;
 			display: block;
 			float: left;
 			text-align: right;
@@ -25,16 +28,16 @@
 		}
 		.input-values {
 			margin-bottom: 20px;
-			width: 400px;
+			width: 330px;
 			float: left;
 		}
 		input {
-			font-size: 16px;
-			padding: 5px;
-			width: 100px;
+			font-size: 13px;
+			padding: 2px;
+			width: 80px;
 		}
 		label {
-			padding: 5px;
+			padding: 4px;
 		}
 		table {
 			border-collapse: collapse;
@@ -46,35 +49,81 @@
 			min-width: 390px;
 		}
 		.stat {
-			padding: 0 10px;
+			text-align: left;
+			padding-right: 5px;
+		}
+		.stat-value {
+			padding-right: 10px;
 		}
 		table td span {
 			display: block;
 			float: left;
-			margin-right: 15px;
 		}
-		.retired {
-			background-color: gold;
+		.total {
+			margin-left: 15px;
 		}
-		.saving {
-			background-color: green;
+
+		#advanced-toggle {
+			position: absolute;
+			bottom: 10px;
+			left: 10px;
 		}
-		.saving.waiting {
-			background-color: lightgreen;
+		#advanced-toggle a {
+			text-decoration: none;
 		}
-		.positive {
-			color: green;
-		}
-		.negative {
-			color: darkred;
-		}
+
+		.saving .traditional {background-color: hsl(90, 100%, 35%);}
+		.saving .roth {background-color: hsl(130, 70%, 55%);}
+		.saving .investment {background-color: hsl(150, 60%, 75%);}
+
+		.waiting .traditional {background-color: hsl(200, 100%, 40%);}
+		.waiting .roth {background-color: hsl(210, 60%, 63%);}
+		.waiting .investment {background-color: hsl(220, 100%, 83%);}
+
+		.retired .traditional {background-color: hsl(40, 100%, 50%);}
+		.retired .roth {background-color: hsl(45, 100%, 60%);}
+		.retired .investment {background-color: hsl(50, 100%, 70%);}
+
+		.positive {color: green;}
+		.negative {color: darkred;}
 	</style>
 </head>
 <body>
 	<div class="input-values">
 		<h1>Retirement Calculator</h1>
 
-		<h4>Market Assumptions</h4>
+		<h4>Lifestyle Choices</h4>
+		<label for="savingsRate">Savings Rate</label>
+		<input type="number" id="savingsRate" min="0" max="100"/>%
+		<br/>
+		<label for="retirementSpending">Retirement Spending $</label>
+		<input type="number" id="retirementSpending" min="0" step="5000"/>
+		<br/>
+		<label for="retireDelayYears">Retire Delay Years</label>
+		<input type="number" id="retireDelayYears" min="0"/>
+		<br/>
+
+		<h4>Personal Info</h4>
+		<label for="age">Age</label>
+		<input type="number" id="age" min="0" max="100"/>
+		<br/>
+		<label for="ageAtDeath">Age at Death</label>
+		<input type="number" id="ageAtDeath" min="0" max="130"/>
+		<br/>
+		<label for="income">Income $</label>
+		<input type="number" id="income" min="0" step="5000"/>
+		<br/>
+		<label for="currentTraditional">Current Traditional $</label>
+		<input type="number" id="currentTraditional" min="0" step="5000"/>
+		<br/>
+		<label for="currentRoth">Current Roth $</label>
+		<input type="number" id="currentRoth" min="0" step="5000"/>
+		<br/>
+		<label for="currentInvestment">Current Investment $</label>
+		<input type="number" id="currentInvestment" min="0" step="5000"/>
+		<br/>
+
+		<h4>Market Conditions</h4>
 		<label for="inflationRate">Inflation Rate</label>
 		<input type="number" id="inflationRate" min="0" step="0.1" max="100"/>%
 		<br/>
@@ -85,46 +134,64 @@
 		<input type="number" id="raiseRate" min="0" max="100"/>%
 		<br/>
 
-		<h4>Simulation Params</h4>
-		<label for="age">Age</label>
-		<input type="number" id="age" min="0" max="100"/>
+		<h4>Tax Information</h4>
+		<label for="currentTaxRate">Current Tax Rate</label>
+		<input type="number" id="currentTaxRate" min="15" max="60"/>%
 		<br/>
-		<label for="ageAtDeath">Age at Death</label>
-		<input type="number" id="ageAtDeath" min="0" max="130"/>
+		<label for="retiredTaxRate">Retired Tax Rate</label>
+		<input type="number" id="retiredTaxRate" min="15" max="60"/>%
 		<br/>
-		<label for="income">Income $</label>
-		<input type="number" id="income" min="0" step="5000"/>
+		<label for="traditionalLimit">Traditional Limit $</label>
+		<input type="number" id="traditionalLimit" min="10000" step="1000" max="30000"/>
 		<br/>
-		<label for="currentSavings">Current Savings $</label>
-		<input type="number" id="currentSavings" min="0" step="5000"/>
+		<label for="rothLimit">Roth Limit $</label>
+		<input type="number" id="rothLimit" min="1000" step="100" max="20000"/>
 		<br/>
-
-		<h4>Lifestyle Choices</h4>
-		<label for="savingsRate">Savings Rate</label>
-		<input type="number" id="savingsRate" min="0" max="100"/>%
+		<label for="matchMin">Min Contrib For Match</label>
+		<input type="number" id="matchMin" min="1" step="1" max="9"/>%
 		<br/>
-		<label for="retireDelayYears">Retire Delay Years</label>
-		<input type="number" id="retireDelayYears" min="0"/>
+		<label for="penaltyRate">Penalty Rate</label>
+		<input type="number" id="penaltyRate" min="5" step="1" max="15"/>%
 		<br/>
-		<label for="retirementSpending">Retirement Spending $</label>
-		<input type="number" id="retirementSpending" min="0" step="5000"/>
+		<label for="penaltyAge">Penalty Free Age</label>
+		<input type="number" id="penaltyAge" min="50" step="1" max="70"/>
 		<br/>
+		<div id="advanced-toggle"></div>
 	</div>
 	<div id="data"></div>
 	<script>
+		const advancedMode = window.location.search.indexOf('showContributions=false') === -1
+		let toggle = document.getElementById('advanced-toggle')
+		if (advancedMode) {
+			toggle.innerHTML = `<a href="${window.location.pathname}?showContributions=false">Hide account breakdown</a>`
+		} else {
+			toggle.innerHTML = `<a href="${window.location.pathname}">Show account breakdown</a>`
+		}
 		const settingTypes = {
 			inflationRate: {type: 'percent', default: 3.2},
 			earningsRate: {type: 'percent', default: 6},
 			raiseRate: {type: 'percent', default: 4},
-			savingsRate: {type: 'percent', default: 10},
+
+			currentTaxRate: {type: 'percent', default: 25},
+			retiredTaxRate: {type: 'percent', default: 20},
+			traditionalLimit: {type: 'currency', default: 36000},
+			matchMin: {type: 'percent', default: 6},
+			rothLimit: {type: 'currency', default: 11000},
+			penaltyRate: {type: 'percent', default: 10},
+			penaltyAge: {type: 'integer', default: 60},
+
 			age: {type: 'integer', default: 30},
 			ageAtDeath: {type: 'integer', default: 95},
-			retireDelayYears: {type: 'integer', default: 0},
 			income: {type: 'currency', default: 100000},
-			currentSavings: {type: 'currency', default: 10000},
+			currentTraditional: {type: 'currency', default: 10000},
+			currentRoth: {type: 'currency', default: 0},
+			currentInvestment: {type: 'currency', default: 10000},
+
+			savingsRate: {type: 'percent', default: 10},
+			retireDelayYears: {type: 'integer', default: 0},
 			retirementSpending: {type: 'currency', default: 60000},
 		}
-		const settingsVersion = 2
+		const settingsVersion = 3
 		const localStorageKey = 'settings' + settingsVersion
 		const getDom = selector => document.getElementById(selector).value
 		const setDom = (selector, value) => document.getElementById(selector).value = value
@@ -174,6 +241,40 @@
 			return values
 		}
 
+		function pickDepositAmounts(state, amountAvailable) {
+			let minForMatch = state.matchMin * state.income / 12
+			let traditionalDeposit = Math.max(Math.min(amountAvailable, minForMatch, state.traditionalLimit / 12),0)
+			amountAvailable -= traditionalDeposit
+			let rothDeposit = Math.max(Math.min(amountAvailable, state.rothLimit / 12), 0)
+			amountAvailable -= rothDeposit
+			let additionalTraditional = Math.max(Math.min(state.traditionalLimit / 12 - traditionalDeposit, amountAvailable), 0)
+			amountAvailable -= additionalTraditional
+			let investmentDeposit = Math.max(amountAvailable, 0)
+			traditionalDeposit += additionalTraditional
+			return {
+				traditionalDeposit,
+				rothDeposit,
+				investmentDeposit
+			}
+		}
+
+		// Withdraws extra to account for taxes & penalties
+		function pickWithdrawalAmounts(state, amountNeeded) {
+			let traditionalTaxRate = state.age >= state.penaltyAge ? state.retiredTaxRate : state.retiredTaxRate + state.penaltyRate
+			let rothTaxRate = state.age >= state.penaltyAge ? 0 : state.penaltyRate
+			let investmentWithdrawal = Math.max(Math.min(amountNeeded, state.currentInvestment), 0)
+			amountNeeded -= investmentWithdrawal
+			let traditionalWithdrawal = Math.max(Math.min(amountNeeded / (1 - traditionalTaxRate), state.currentTraditional), 0)
+			amountNeeded -= traditionalWithdrawal
+			let rothWithdrawal = Math.max(amountNeeded / (1 - rothTaxRate), 0)
+
+			return {
+				traditionalWithdrawal,
+				rothWithdrawal,
+				investmentWithdrawal
+			}
+		}
+
 		function simulateLife (state) {
 			let years = []
 			const maxIterations = state.ageAtDeath
@@ -181,9 +282,6 @@
 			let couldHaveRetiredYearsAgo = 0
 			state.inflationAdjustment = 1
 			state.adjustedRetirementSpending = state.retirementSpending
-			state.yearlyContributions = 0
-			state.yearlyWithdrawals = 0
-			state.yearlyInterest = 0
 			state.retired = false
 			state.year = (new Date()).getFullYear()
 
@@ -194,24 +292,66 @@
 				}
 				iterations++
 				state.couldHaveRetiredYearsAgo = couldHaveRetiredYearsAgo
-				state.yearlyContributions = 0
-				state.yearlyWithdrawals = 0
-				state.yearlyInterest = 0
-				state.priorSavings = state.currentSavings
+
+				state.yearlyTraditionalContributions = 0
+				state.yearlyRothContributions = 0
+				state.yearlyInvestmentContributions = 0
+				state.yearlyTotalContributions = 0
+
+				state.yearlyTraditionalWithdrawals = 0
+				state.yearlyRothWithdrawals = 0
+				state.yearlyInvestmentWithdrawals = 0
+				state.yearlyTotalWithdrawals = 0
+
+				state.yearlyTraditionalInterest = 0
+				state.yearlyRothInterest = 0
+				state.yearlyInvestmentInterest = 0
+
+				state.yearlyTaxes = 0
+
+				state.priorTraditional = state.currentTraditional
+				state.priorRoth = state.currentRoth
+				state.priorInvestment = state.currentInvestment
 
 				for (let month=0; month<12; month++) {
-					let priorSavings = state.currentSavings
+					let priorTraditional = state.currentTraditional
+					let priorRoth = state.currentRoth
+					let priorInvestment = state.currentInvestment
 					// Assume you experience inflation throughout the year
 					state.inflationAdjustment *= (1 + state.inflationRate / 12)
-					state.currentSavings *= (1 + state.earningsRate / 12)
-					state.yearlyInterest += state.currentSavings - priorSavings
+					state.traditionalLimit *= (1 + state.inflationRate / 12)
+					state.rothLimit *= (1 + state.inflationRate / 12)
+					state.currentTraditional *= (1 + state.earningsRate / 12)
+					state.currentRoth *= (1 + state.earningsRate / 12)
+					state.currentInvestment *= (1 + state.earningsRate / 12)
+
+					state.yearlyTraditionalInterest += state.currentTraditional - priorTraditional
+					state.yearlyRothInterest += state.currentRoth - priorRoth
+					state.yearlyInvestmentInterest += state.currentInvestment - priorInvestment
 
 					// Assume you don't earn interest on the current months deposits
-					let depositAmount = state.income * state.savingsRate / 12
-					state.yearlyContributions += depositAmount
-					state.currentSavings += depositAmount
+					let amountAvailable = state.income * state.savingsRate / 12
+					let {traditionalDeposit, rothDeposit, investmentDeposit} = pickDepositAmounts(state, amountAvailable)
+
+					state.yearlyTotalContributions += amountAvailable
+					state.yearlyTraditionalContributions += traditionalDeposit
+					state.yearlyRothContributions += rothDeposit
+					state.yearlyInvestmentContributions += investmentDeposit
+
+					state.currentTraditional += traditionalDeposit
+					state.currentRoth += rothDeposit
+					state.currentInvestment += investmentDeposit
 					state.adjustedRetirementSpending = state.retirementSpending * state.inflationAdjustment
 				}
+
+				// Regular investments get taxed each year, but not traditional/roth
+				let investmentTaxBill = state.yearlyInvestmentInterest * state.currentTaxRate
+				state.currentInvestment -= investmentTaxBill
+				state.yearlyInvestmentInterest -= investmentTaxBill
+				state.yearlyTaxes += investmentTaxBill
+
+				state.yearlyTotalInterest = state.yearlyTraditionalInterest + state.yearlyRothInterest + state.yearlyInvestmentInterest
+				state.currentTotal = state.currentTraditional + state.currentRoth + state.currentInvestment
 				years.push(Object.assign({}, state))
 				// Assume you only get raises at the end of the year
 				state.income *= (1 + state.raiseRate)
@@ -223,32 +363,82 @@
 				const testState = Object.assign({}, state);
 				testState.income = 0
 				testState.retired = true
+				testState.couldHaveRetiredYearsAgo = 0
 				let testIterations = 0
 				let testYears = [];
 				// Simulate retired years
-				while (testState.age <= testState.ageAtDeath && testState.currentSavings > 0) {
+				while (testState.age <= testState.ageAtDeath && testState.currentTotal > 0) {
 					if (testIterations > maxIterations) {
 						throw new Error('Simulated too many test years, something is broken')
 					}
 					testIterations++
-					testState.yearlyContributions = 0
-					testState.yearlyWithdrawals = 0
-					testState.yearlyInterest = 0
-					testState.priorSavings = testState.currentSavings
+
+					testState.yearlyTraditionalContributions = 0
+					testState.yearlyRothContributions = 0
+					testState.yearlyInvestmentContributions = 0
+					testState.yearlyTotalContributions = 0
+
+					testState.yearlyTraditionalWithdrawals = 0
+					testState.yearlyRothlWithdrawals = 0
+					testState.yearlyInvestmentWithdrawals = 0
+					testState.yearlyTotalWithdrawals = 0
+
+					testState.yearlyTraditionalInterest = 0
+					testState.yearlyRothInterest = 0
+					testState.yearlyInvestmentInterest = 0
+
+					testState.yearlyTaxes = 0
+
+					testState.priorTraditional = testState.currentTraditional
+					testState.priorRoth = testState.currentRoth
+					testState.priorInvestment = testState.currentInvestment
+					testState.priorTotal = testState.currentTotal
 
 					for (let month=0; month<12; month++) {
 						testState.inflationAdjustment *= (1 + testState.inflationRate / 12)
 						testState.adjustedRetirementSpending = testState.retirementSpending * testState.inflationAdjustment
+
 						// Assume you withdraw money at the beginning of the month
-						let withdrawalAmount = testState.adjustedRetirementSpending / 12
-						testState.yearlyWithdrawals += withdrawalAmount
-						testState.currentSavings -= withdrawalAmount
+						let amountNeeded = testState.adjustedRetirementSpending / 12
+
+						// Traditional accounts are subject to taxes, and traditional/roth accounts are sometimes subject to penalties
+						// totalWithdrawal might be greater than amount needed to account for this
+						let {traditionalWithdrawal, rothWithdrawal, investmentWithdrawal} = pickWithdrawalAmounts(testState, amountNeeded)
+						let totalWithdrawal = traditionalWithdrawal + rothWithdrawal + investmentWithdrawal
+						let taxPenalties = totalWithdrawal - amountNeeded
+						testState.yearlyTaxes += taxPenalties
+
+						testState.yearlyTotalWithdrawals += totalWithdrawal
+						testState.yearlyTraditionalWithdrawals += traditionalWithdrawal
+						testState.yearlyRothWithdrawals += rothWithdrawal
+						testState.yearlyInvestmentWithdrawals += investmentWithdrawal
+
+						testState.currentTraditional -= traditionalWithdrawal
+						testState.currentRoth -= rothWithdrawal
+						testState.currentInvestment -= investmentWithdrawal
 
 						// Assume you earn interest at the end of the month
-						let priorSavings = testState.currentSavings
-						testState.currentSavings *= (1 + testState.earningsRate / 12)
-						testState.yearlyInterest += testState.currentSavings - priorSavings
+						let priorTraditional = testState.currentTraditional
+						let priorRoth = testState.currentRoth
+						let priorInvestment = testState.currentInvestment
+
+						testState.currentTraditional *= (1 + testState.earningsRate / 12)
+						testState.currentRoth *= (1 + testState.earningsRate / 12)
+						testState.currentInvestment *= (1 + testState.earningsRate / 12)
+
+						testState.yearlyTraditionalInterest += testState.currentTraditional - priorTraditional
+						testState.yearlyRothInterest += testState.currentRoth - priorRoth
+						let monthlyInvestmentInterest = testState.currentInvestment - priorInvestment
+						testState.yearlyInvestmentInterest += monthlyInvestmentInterest
+
+						let investmentTaxBill = monthlyInvestmentInterest * state.retiredTaxRate
+						testState.yearlyInvestmentInterest -= investmentTaxBill
+						testState.currentInvestment -= investmentTaxBill
+						testState.yearlyTaxes += investmentTaxBill
 					}
+
+					testState.yearlyTotalInterest = testState.yearlyTraditionalInterest + testState.yearlyRothInterest + testState.yearlyInvestmentInterest
+					testState.currentTotal = testState.currentTraditional + testState.currentRoth + testState.currentInvestment
 					testYears.push(Object.assign({}, testState))
 					testState.age++
 					testState.year++
@@ -256,7 +446,7 @@
 				}
 
 				// Check if we were able to retire
-				if (testState.age >= testState.ageAtDeath && testState.currentSavings >= 0) {
+				if (testState.age >= testState.ageAtDeath && testState.currentTotal >= 0) {
 
 					// Check if we wanted to delay retirement
 					if (testState.retireDelayYears > state.couldHaveRetiredYearsAgo) {
@@ -276,7 +466,7 @@
 			let firstYear = years[0]
 			let lastYear = years[years.length-1]
 			let yearRetired = years.find(year => year.retired)
-			let maxAmount = years.reduce((max, c) => Math.max(max, c.currentSavings), 0)
+			let maxAmount = years.reduce((max, c) => Math.max(max, c.currentTotal), 0)
 			let data = document.getElementById('data')
 			let fontSize = Math.min(
 				18,
@@ -291,24 +481,59 @@
 						<th>Age</th>
 						<th class="bar-container">Account Value</th>
 						<th class="stat">Interest</th>
+						${advancedMode ? `<th class="stat">Taxes</th>` : ''}
+						${advancedMode ? `<th class="stat">Traditional</th>` : ''}
+						${advancedMode ? `<th class="stat">Roth</th>` : ''}
+						${advancedMode ? `<th class="stat">Investment</th>` : ''}
 						<th class="stat">In/Out</th>
 						<th class="stat">Out Rate</th>
 					</tr>
 					${years.map(year => `
 						<tr>
 							<td>${year.age}</td>
-							<td>
-								<span class="bar ${year.retired ? 'retired' : 'saving'} ${year.couldHaveRetiredYearsAgo ? 'waiting' : ''}" style="width:${year.currentSavings * graphWidth / maxAmount}px;height:${fontSize-1}px"></span>
-								<span style="height:${fontSize}px">${abbrev(year.currentSavings)}</span>
+							<td class="${year.couldHaveRetiredYearsAgo > 0 ? 'waiting' : !year.retired ? 'saving' : 'retired'}">
+								<span
+									title="traditional account ${abbrev(year.currentTraditional)}"
+									class="traditional"
+									style="width:${year.currentTraditional * graphWidth / maxAmount}px;height:${fontSize-1}px">
+								</span>
+								<span
+									title="roth account ${abbrev(year.currentRoth)}"
+									class="roth"
+									style="width:${year.currentRoth * graphWidth / maxAmount}px;height:${fontSize-1}px">
+								</span>
+								<span
+									title="investment account ${abbrev(year.currentInvestment)}"
+									class="investment"
+									style="width:${year.currentInvestment * graphWidth / maxAmount}px;height:${fontSize-1}px">
+								</span>
+								<span
+									class="total" style="height:${fontSize}px">${abbrev(year.currentTotal)}</span>
 							</td>
-							<td class="positive">${abbrev(year.yearlyInterest)}</td>
-							<td class="${year.yearlyContributions ? 'positive' : 'negative'}">
-								${year.yearlyContributions
-									? abbrev(year.yearlyContributions)
-									: `(${abbrev(year.yearlyWithdrawals)})`
+							<td class="stat-value positive">${abbrev(year.yearlyTotalInterest)}</td>
+							${advancedMode ? `<td class="stat-value negative">${abbrev(year.yearlyTaxes)}</td>` : ''}
+							${advancedMode ? `<td class="stat-value ${year.yearlyTraditionalWithdrawals > 0 ? 'negative' : 'positive'}">
+								${year.yearlyTraditionalWithdrawals > 0
+									? `(${abbrev(year.yearlyTraditionalWithdrawals)})`
+									: abbrev(year.yearlyTraditionalContributions)
+							}</td>` : ''}
+							${advancedMode ? `<td class="stat-value ${year.yearlyRothWithdrawals > 0 ? 'negative' : 'positive'}">
+								${year.yearlyRothWithdrawals > 0
+									? `(${abbrev(year.yearlyRothWithdrawals)})`
+									: abbrev(year.yearlyRothContributions)
+							}</td>` : ''}
+							${advancedMode ? `<td class="stat-value ${year.yearlyInvestmentWithdrawals > 0 ? 'negative' : 'positive'}">
+								${year.yearlyInvestmentWithdrawals > 0
+									? `(${abbrev(year.yearlyInvestmentWithdrawals)})`
+									: abbrev(year.yearlyInvestmentContributions)
+							}</td>` : ''}
+							<td class="stat-value ${year.yearlyTotalWithdrawals > 0 ? 'negative' : 'positive'}">
+								${year.yearlyTotalWithdrawals > 0
+									? `(${abbrev(year.yearlyTotalWithdrawals)})`
+									: abbrev(year.yearlyTotalContributions)
 							}</td>
-							<td>${year.yearlyWithdrawals
-								? format(year.yearlyWithdrawals * 100 / year.priorSavings,1) + '%'
+							<td>${year.yearlyTotalWithdrawals
+								? format(year.yearlyTotalWithdrawals * 100 / year.priorTotal,1) + '%'
 								: ''
 							}</td>
 						</tr>
@@ -340,7 +565,7 @@
 		// Helper function
 		function format (num, n, x) {
 		    var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\.' : '$') + ')'
-		    return num.toFixed(Math.max(0, ~~n)).replace(new RegExp(re, 'g'), '$&,')
+		    return num ? num.toFixed(Math.max(0, ~~n)).replace(new RegExp(re, 'g'), '$&,') : ''
 		}
 
 		function abbrev(num) {
@@ -352,7 +577,7 @@
 			}
 			let bigDigits = num > 100 ? 3 : (num > 10 ? 2 : 1)
 			let unit = iterations > 0 ? units[iterations-1] : ''
-			return '$' + format(num, 3-bigDigits) + unit
+			return (num === 0 ? '' : '$') + format(num, 3-bigDigits) + unit
 		}
 
 		function throttle(callback, ms) {
