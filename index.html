@@ -148,7 +148,10 @@
 		<input type="number" id="rothLimit" min="1000" step="100" max="20000"/>
 		<br/>
 		<label for="matchMin">Min Contrib For Match</label>
-		<input type="number" id="matchMin" min="1" step="1" max="9"/>%
+		<input type="number" id="matchMin" min="1" step="1" max="12"/>%
+		<br/>
+		<label for="maxMatch">Max Match </label>
+		<input type="number" id="maxMatch" min="0" step="0.5" max="9"/>%
 		<br/>
 		<label for="penaltyRate">Penalty Rate</label>
 		<input type="number" id="penaltyRate" min="5" step="1" max="15"/>%
@@ -160,12 +163,12 @@
 	</div>
 	<div id="data"></div>
 	<script>
-		const advancedMode = window.location.search.indexOf('showContributions=false') === -1
+		const advancedMode = window.location.search.indexOf('showContributions=true') !== -1
 		let toggle = document.getElementById('advanced-toggle')
 		if (advancedMode) {
-			toggle.innerHTML = `<a href="${window.location.pathname}?showContributions=false">Hide account breakdown</a>`
+			toggle.innerHTML = `<a href="${window.location.pathname}">Hide account breakdown</a>`
 		} else {
-			toggle.innerHTML = `<a href="${window.location.pathname}">Show account breakdown</a>`
+			toggle.innerHTML = `<a href="${window.location.pathname}?showContributions=true">Show account breakdown</a>`
 		}
 		const settingTypes = {
 			inflationRate: {type: 'percent', default: 3.2},
@@ -176,6 +179,7 @@
 			retiredTaxRate: {type: 'percent', default: 20},
 			traditionalLimit: {type: 'currency', default: 36000},
 			matchMin: {type: 'percent', default: 6},
+			maxMatch: {type: 'percent', default: 1.5},
 			rothLimit: {type: 'currency', default: 11000},
 			penaltyRate: {type: 'percent', default: 10},
 			penaltyAge: {type: 'integer', default: 60},
@@ -191,7 +195,7 @@
 			retireDelayYears: {type: 'integer', default: 0},
 			retirementSpending: {type: 'currency', default: 60000},
 		}
-		const settingsVersion = 3
+		const settingsVersion = 4
 		const localStorageKey = 'settings' + settingsVersion
 		const getDom = selector => document.getElementById(selector).value
 		const setDom = (selector, value) => document.getElementById(selector).value = value
@@ -244,6 +248,7 @@
 		function pickDepositAmounts(state, amountAvailable) {
 			let minForMatch = state.matchMin * state.income / 12
 			let traditionalDeposit = Math.max(Math.min(amountAvailable, minForMatch, state.traditionalLimit / 12),0)
+			let companyMatch = (traditionalDeposit / minForMatch) * state.maxMatch * state.income / 12
 			amountAvailable -= traditionalDeposit
 			let rothDeposit = Math.max(Math.min(amountAvailable, state.rothLimit / 12), 0)
 			amountAvailable -= rothDeposit
@@ -251,6 +256,7 @@
 			amountAvailable -= additionalTraditional
 			let investmentDeposit = Math.max(amountAvailable, 0)
 			traditionalDeposit += additionalTraditional
+			traditionalDeposit += companyMatch
 			return {
 				traditionalDeposit,
 				rothDeposit,
@@ -333,7 +339,9 @@
 					let amountAvailable = state.income * state.savingsRate / 12
 					let {traditionalDeposit, rothDeposit, investmentDeposit} = pickDepositAmounts(state, amountAvailable)
 
-					state.yearlyTotalContributions += amountAvailable
+					// Might include some company match, so be sure to add things up
+					let amountDeposited = traditionalDeposit + rothDeposit + investmentDeposit
+					state.yearlyTotalContributions += amountDeposited
 					state.yearlyTraditionalContributions += traditionalDeposit
 					state.yearlyRothContributions += rothDeposit
 					state.yearlyInvestmentContributions += investmentDeposit
