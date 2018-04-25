@@ -44,6 +44,7 @@
 		}
 		table td {
 			padding: 0;
+			white-space: nowrap;
 		}
 		.bar-container {
 			min-width: 390px;
@@ -147,10 +148,10 @@
 		<label for="rothLimit">Roth Limit $</label>
 		<input type="number" id="rothLimit" min="1000" step="100" max="20000"/>
 		<br/>
-		<label for="matchMin">Min Contrib For Match</label>
+		<label for="matchMin">Contrib for Full Match</label>
 		<input type="number" id="matchMin" min="1" step="1" max="12"/>%
 		<br/>
-		<label for="maxMatch">Max Match </label>
+		<label for="maxMatch">Max Match Value</label>
 		<input type="number" id="maxMatch" min="0" step="0.5" max="9"/>%
 		<br/>
 		<label for="penaltyRate">Penalty Rate</label>
@@ -325,8 +326,6 @@
 					let priorInvestment = state.currentInvestment
 					// Assume you experience inflation throughout the year
 					state.inflationAdjustment *= (1 + state.inflationRate / 12)
-					state.traditionalLimit *= (1 + state.inflationRate / 12)
-					state.rothLimit *= (1 + state.inflationRate / 12)
 					state.currentTraditional *= (1 + state.earningsRate / 12)
 					state.currentRoth *= (1 + state.earningsRate / 12)
 					state.currentInvestment *= (1 + state.earningsRate / 12)
@@ -351,6 +350,10 @@
 					state.currentInvestment += investmentDeposit
 					state.adjustedRetirementSpending = state.retirementSpending * state.inflationAdjustment
 				}
+
+				// Assume contribution limits scale roughly with inflation
+				state.traditionalLimit *= (1 + state.inflationRate)
+				state.rothLimit *= (1 + state.inflationRate)
 
 				// Regular investments get taxed each year, but not traditional/roth
 				let investmentTaxBill = state.yearlyInvestmentInterest * state.currentTaxRate
@@ -439,6 +442,9 @@
 						let monthlyInvestmentInterest = testState.currentInvestment - priorInvestment
 						testState.yearlyInvestmentInterest += monthlyInvestmentInterest
 
+						// It would be more accurate to handle taxes at the end of the year, but it's
+						// difficult to calculate how much you can withdraw if some of it is "reserved"
+						// for taxes. To solve this, just set aside the tax money monthly
 						let investmentTaxBill = monthlyInvestmentInterest * state.retiredTaxRate
 						testState.yearlyInvestmentInterest -= investmentTaxBill
 						testState.currentInvestment -= investmentTaxBill
@@ -483,6 +489,17 @@
 					(document.body.clientHeight-20) / (years.length + 1) - 1
 				)
 			)
+			function traditionalContributionPercents (year) {
+				let matchObtainedPercent = Math.round(
+					Math.min(
+						year.yearlyTraditionalContributions / ((year.maxMatch + year.matchMin) * year.income),
+						1
+					) * 100
+				) / 100
+				let matchAmount = year.maxMatch * matchObtainedPercent
+				let nonMatchAmount = (year.yearlyTraditionalContributions) / year.income - matchAmount
+				return `${format(nonMatchAmount * 100,1)}+${format(matchAmount*100,1)}%`
+			}
 			let table = `
 				<table style="font-size:${fontSize}px;line-height:${fontSize}px">
 					<tr>
@@ -521,19 +538,25 @@
 							<td class="stat-value positive">${abbrev(year.yearlyTotalInterest)}</td>
 							${advancedMode ? `<td class="stat-value negative">${abbrev(year.yearlyTaxes)}</td>` : ''}
 							${advancedMode ? `<td class="stat-value ${year.yearlyTraditionalWithdrawals > 0 ? 'negative' : 'positive'}">
-								${year.yearlyTraditionalWithdrawals > 0
-									? `(${abbrev(year.yearlyTraditionalWithdrawals)})`
-									: abbrev(year.yearlyTraditionalContributions)
+								${year.yearlyTraditionalWithdrawals === 0 && year.yearlyTraditionalContributions === 0
+									? ''
+									: year.yearlyTraditionalWithdrawals > 0
+										? `(${abbrev(year.yearlyTraditionalWithdrawals)})`
+										: `${abbrev(year.yearlyTraditionalContributions)} (${traditionalContributionPercents(year)})`
 							}</td>` : ''}
 							${advancedMode ? `<td class="stat-value ${year.yearlyRothWithdrawals > 0 ? 'negative' : 'positive'}">
-								${year.yearlyRothWithdrawals > 0
-									? `(${abbrev(year.yearlyRothWithdrawals)})`
-									: abbrev(year.yearlyRothContributions)
+								${year.yearlyRothWithdrawals === 0 && year.yearlyRothContributions === 0
+									? ''
+									: year.yearlyRothWithdrawals > 0
+										? `(${abbrev(year.yearlyRothWithdrawals)})`
+										: `${abbrev(year.yearlyRothContributions)} (${format(year.yearlyRothContributions * 100 / year.income, 1)}%)`
 							}</td>` : ''}
 							${advancedMode ? `<td class="stat-value ${year.yearlyInvestmentWithdrawals > 0 ? 'negative' : 'positive'}">
-								${year.yearlyInvestmentWithdrawals > 0
+								${year.yearlyInvestmentWithdrawals === 0 && year.yearlyInvestmentContributions === 0
+									? ''
+									: year.yearlyInvestmentWithdrawals > 0
 									? `(${abbrev(year.yearlyInvestmentWithdrawals)})`
-									: abbrev(year.yearlyInvestmentContributions)
+									: `${abbrev(year.yearlyInvestmentContributions)} (${format(year.yearlyInvestmentContributions * 100 / year.income, 1)}%)`
 							}</td>` : ''}
 							<td class="stat-value ${year.yearlyTotalWithdrawals > 0 ? 'negative' : 'positive'}">
 								${year.yearlyTotalWithdrawals > 0
