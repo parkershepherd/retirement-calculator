@@ -9,22 +9,23 @@
 			font-size: 25px;
 			text-align: center;
 			border-bottom: solid 1px lightgrey;
-			margin: 5px 20px 10px;
-			padding-bottom: 10px;
+			margin: 5px 20px 0;
+			padding-bottom: 5px;
 		}
 		h4, label {
 			width: 170px;
 		}
 		h4 {
 			text-align: right;
-			margin: 30px 0 10px 0;
+			margin: 25px 0 5px 0;
 		}
 		label {
-			font-size: 14px;
+			font-size: 13px;
 			display: block;
 			float: left;
 			text-align: right;
-			padding-right: 10px;
+			padding: 4px;
+			padding-right: 8px;
 		}
 		.input-values {
 			margin-bottom: 20px;
@@ -32,12 +33,9 @@
 			float: left;
 		}
 		input {
-			font-size: 13px;
+			font-size: 12px;
 			padding: 2px;
 			width: 80px;
-		}
-		label {
-			padding: 4px;
 		}
 		table {
 			border-collapse: collapse;
@@ -54,7 +52,7 @@
 			padding-right: 5px;
 		}
 		.stat-value {
-			padding-right: 10px;
+			padding-right: 15px;
 		}
 		table td span {
 			display: block;
@@ -64,10 +62,15 @@
 			margin-left: 15px;
 		}
 
-		#advanced-toggle {
-			position: absolute;
-			bottom: 10px;
-			left: 10px;
+		#strategy {
+			margin-top: 30px;
+		}
+		#strategy b {
+			font-size: 12px;
+		}
+		#strategy p {
+			margin-top: 0;
+			font-size: 12px;
 		}
 		#advanced-toggle a {
 			text-decoration: none;
@@ -94,13 +97,13 @@
 		<h1>Retirement Calculator</h1>
 
 		<h4>Lifestyle Choices</h4>
-		<label for="savingsRate">Savings Rate</label>
-		<input type="number" id="savingsRate" min="0" max="100"/>%
+		<label for="savingsRate" title="% of pre-tax income set aside for saving (might be taxed)">Savings Rate*</label>
+		<input type="number" id="savingsRate" min="0" step="0.5" max="100"/>%
 		<br/>
-		<label for="retirementSpending">Retirement Spending $</label>
+		<label for="retirementSpending" title="After-tax dollars you want to be able to spend (will be inflation adjusted)">Retirement Spending $</label>
 		<input type="number" id="retirementSpending" min="0" step="5000"/>
 		<br/>
-		<label for="retireDelayYears">Retire Delay Years</label>
+		<label for="retireDelayYears" title="Delay retirement to build an extra cusion">Retire Delay Years</label>
 		<input type="number" id="retireDelayYears" min="0"/>
 		<br/>
 
@@ -111,7 +114,7 @@
 		<label for="ageAtDeath">Age at Death</label>
 		<input type="number" id="ageAtDeath" min="0" max="130"/>
 		<br/>
-		<label for="income">Income $</label>
+		<label for="income" title="Pre-tax income (raises will be factored in)">Income $</label>
 		<input type="number" id="income" min="0" step="5000"/>
 		<br/>
 		<label for="currentTraditional">Current Traditional $</label>
@@ -125,10 +128,10 @@
 		<br/>
 
 		<h4>Market Conditions</h4>
-		<label for="inflationRate">Inflation Rate</label>
+		<label for="inflationRate" title="Affects cost of living, withdrawal rate, & contribution limits">Inflation Rate</label>
 		<input type="number" id="inflationRate" min="0" step="0.1" max="100"/>%
 		<br/>
-		<label for="earningsRate">Investment Return</label>
+		<label for="earningsRate" title="Average return you expect in your investment accounts">Investment Return</label>
 		<input type="number" id="earningsRate" min="0" step="0.5" max="100"/>%
 		<br/>
 		<label for="raiseRate">Raise Rate</label>
@@ -136,30 +139,40 @@
 		<br/>
 
 		<h4>Tax Information</h4>
-		<label for="currentTaxRate">Current Tax Rate</label>
+		<label for="currentTaxRate" title="Effective tax rate to use before retirement (non-tax-deferred deposits & interest)">Current Tax Rate</label>
 		<input type="number" id="currentTaxRate" min="15" max="60"/>%
 		<br/>
-		<label for="retiredTaxRate">Retired Tax Rate</label>
+		<label for="retiredTaxRate" title="Effecitve tax rate to use after retirement (tax-deferred withdrawals & non-tax-deferred interest)">Retired Tax Rate</label>
 		<input type="number" id="retiredTaxRate" min="15" max="60"/>%
 		<br/>
-		<label for="traditionalLimit">Traditional Limit $</label>
+		<label for="traditionalLimit" title="Household limit (doesn't include employer contributions). Keeps pace with inflation">Traditional Limit $</label>
 		<input type="number" id="traditionalLimit" min="10000" step="1000" max="30000"/>
 		<br/>
-		<label for="rothLimit">Roth Limit $</label>
+		<label for="rothLimit" title="Household limit. Keeps pace with inflation">Roth Limit $</label>
 		<input type="number" id="rothLimit" min="1000" step="100" max="20000"/>
 		<br/>
-		<label for="matchMin">Contrib for Full Match</label>
+		<label for="matchMin" title="Assumes company match is traditional only">Contrib for Full Match</label>
 		<input type="number" id="matchMin" min="1" step="1" max="12"/>%
 		<br/>
-		<label for="maxMatch">Max Match Value</label>
+		<label for="maxMatch" title="Assumes company match is traditional only">Max Match Value</label>
 		<input type="number" id="maxMatch" min="0" step="0.5" max="9"/>%
 		<br/>
-		<label for="penaltyRate">Penalty Rate</label>
+		<label for="penaltyRate" title="Additional penalty if a tax-deferred account is withdrawn from before the penalty free age">Penalty Rate</label>
 		<input type="number" id="penaltyRate" min="5" step="1" max="15"/>%
 		<br/>
 		<label for="penaltyAge">Penalty Free Age</label>
 		<input type="number" id="penaltyAge" min="50" step="1" max="70"/>
 		<br/>
+		<div id="strategy">
+			<b>Deposit Strategy</b>
+			<p><a href="https://www.fool.com/retirement/general/2015/01/25/which-retirement-account-should-you-tap-first.aspx" target="_blank">
+				Match > Roth > Traditional > Investment
+			</a></p>
+			<b>Withdrawal Strategy</b>
+			<p><a href="https://www.fool.com/retirement/general/2015/01/25/which-retirement-account-should-you-tap-first.aspx" target="_blank">
+				Investment > Traditional > Roth
+			</a></p>
+		</div>
 		<div id="advanced-toggle"></div>
 	</div>
 	<div id="data"></div>
@@ -251,14 +264,24 @@
 			let traditionalDeposit = Math.max(Math.min(amountAvailable, minForMatch, state.traditionalLimit / 12),0)
 			let companyMatch = (traditionalDeposit / minForMatch) * state.maxMatch * state.income / 12
 			amountAvailable -= traditionalDeposit
-			let rothDeposit = Math.max(Math.min(amountAvailable, state.rothLimit / 12), 0)
+
+			// Overestimate the roth limit because not all of your pre-tax dollars will actually make it into the account
+			let rothDeposit = Math.max(Math.min(amountAvailable, state.rothLimit / 12 / (1 - state.currentTaxRate)), 0)
 			amountAvailable -= rothDeposit
 			let additionalTraditional = Math.max(Math.min(state.traditionalLimit / 12 - traditionalDeposit, amountAvailable), 0)
 			amountAvailable -= additionalTraditional
 			let investmentDeposit = Math.max(amountAvailable, 0)
 			traditionalDeposit += additionalTraditional
-			traditionalDeposit += companyMatch
+			traditionalDeposit += companyMatch // Company match doesn't come out of your money
+
+			// Not all of your pre-tax dollars make it into the deposit amounts,
+			// i.e. it's more expensive to put money into these accounts
+			let rothTaxes = rothDeposit * (1 - state.currentTaxRate)
+			rothDeposit *= (1 - state.currentTaxRate)
+			let investmentTaxes = investmentDeposit * (1 - state.currentTaxRate)
+			investmentDeposit *= (1 - state.currentTaxRate)
 			return {
+				depositTaxes: rothTaxes + investmentTaxes,
 				traditionalDeposit,
 				rothDeposit,
 				investmentDeposit
@@ -336,9 +359,10 @@
 
 					// Assume you don't earn interest on the current months deposits
 					let amountAvailable = state.income * state.savingsRate / 12
-					let {traditionalDeposit, rothDeposit, investmentDeposit} = pickDepositAmounts(state, amountAvailable)
+					let {traditionalDeposit, rothDeposit, investmentDeposit, depositTaxes} = pickDepositAmounts(state, amountAvailable)
+					state.yearlyTaxes += depositTaxes
 
-					// Might include some company match, so be sure to add things up
+					// Might include some company match, and exclude taxes lost on post-tax accounts
 					let amountDeposited = traditionalDeposit + rothDeposit + investmentDeposit
 					state.yearlyTotalContributions += amountDeposited
 					state.yearlyTraditionalContributions += traditionalDeposit
@@ -486,7 +510,7 @@
 				18,
 				Math.max(
 					10,
-					(document.body.clientHeight-20) / (years.length + 1) - 1
+					(window.innerHeight-20) / (years.length + 1) - 1
 				)
 			)
 			function traditionalContributionPercents (year) {
